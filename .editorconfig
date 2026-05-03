@@ -1,0 +1,21 @@
+# EditorConfig is awesome: https://editorconfig.org
+
+# top-most EditorConfig file - editors stop searching parent dirs after this
+root = true
+
+# Apply to all files
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Markdown files: don't trim trailing whitespace (two spaces = line break in MD)
+[*.md]
+trim_trailing_whitespace = false
+
+# Makefile MUST use tabs (it's how Make works)
+[Makefile]
+indent_style = tab

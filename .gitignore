@@ -1,0 +1,102 @@
+# ========================================
+# Dependencies
+# ========================================
+# Node modules can be huge (hundreds of MB) and are reproducible from package.json
+node_modules/
+.pnp/
+.pnp.js
+
+# ========================================
+# Environment variables (CRITICAL - contains secrets)
+# ========================================
+# Never commit .env files - they contain API keys, OAuth secrets, etc.
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# But DO commit the example file (no real secrets, just placeholders)
+!.env.example
+
+# ========================================
+# Build outputs
+# ========================================
+dist/
+build/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+out/
+
+# ========================================
+# Logs
+# ========================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ========================================
+# Runtime data
+# ========================================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ========================================
+# Local databases (for development)
+# ========================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# ========================================
+# Editor / IDE
+# ========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Cursor's local settings (but keep shared workspace settings)
+.cursor/
+
+# ========================================
+# Operating System
+# ========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# ========================================
+# TypeScript
+# ========================================
+*.tsbuildinfo
+
+# ========================================
+# Test coverage
+# ========================================
+coverage/
+.nyc_output/
+
+# ========================================
+# Project-specific
+# ========================================
+# TTS audio cache (regenerable, takes space)
+cache/
+.cache/
+
+# Local user data files (each developer has their own)
+data/local/
