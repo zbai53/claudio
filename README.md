@@ -39,8 +39,11 @@ project. The radio is just the first instance.
 
 ## Architecture
 
+C## Architecture
+
 Claudio is organized in four layers, each with a clear responsibility:
 
+```
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 1 · Inputs                                       │
 │  User taste corpus · Spotify · Calendar · Weather · TTS │
@@ -62,9 +65,12 @@ Claudio is organized in four layers, each with a clear responsibility:
 │  Layer 4 · Surface                                      │
 │  PWA player · HTTP + WebSocket contract                 │
 └─────────────────────────────────────────────────────────┘
-
+```
 
 A more detailed architecture document lives at [`docs/architecture.md`](./docs/architecture.md) _(coming soon)_.
+
+
+
 
 ## Tech stack
 
