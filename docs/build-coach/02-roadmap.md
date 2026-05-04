@@ -184,7 +184,7 @@ read your taste preferences. The first time this works it will feel magical.
 
 ## Phase 5 — PWA player UI
 
-**Estimate:** ~11 hrs over 4–5 days · **Status:** not started
+**Estimate:** ~13 hrs over 5–6 days · **Status:** not started
 
 ### Goals
 - Looks and feels like a real product, not a dev tool
@@ -193,21 +193,38 @@ read your taste preferences. The first time this works it will feel magical.
 - Taste editor lets the user update `taste.md` in-app
 - Installable as PWA (offline cache)
 
+### Architecture decision (Phase 5 specific)
+Primary player UI stays in Vanilla TypeScript — minimal bundle, the
+state model is simple (now-playing + WS event stream). The Taste Editor
+is built as a separate React sub-app, mounted at `/settings/taste`.
+Rationale: markdown editing with live preview, form state, and auto-save
+genuinely benefits from React's state model; vanilla TS would either
+reinvent it or get messy. This split is the architecture story for the
+resume bullet — "use React where it earns its keep, not by default."
+
+Build implication: Vite supports multiple entry points. The root
+`index.html` loads the vanilla-TS player; `settings/taste/index.html`
+loads the React sub-app. Both share the same dev server.
+
 ### Task list
 - [ ] Integrate Spotify Web Playback SDK
-- [ ] Build `<NowPlaying />` component
-- [ ] Build `<DjBubble />` for streaming chatter
-- [ ] Build `<TasteEditor />` — markdown editor that writes to `data/user/taste.md`
-- [ ] Build `<Settings />` — toggle voices, change persona, view spending
-- [ ] Add service worker for offline cache
+- [ ] Build `<NowPlaying />` component (vanilla TS)
+- [ ] Build `<DjBubble />` for streaming chatter (vanilla TS)
+- [ ] Build `<Settings />` — toggle voices, change persona, view spending (vanilla TS)
+- [ ] Configure Vite multi-entry: add `settings/taste/index.html` as second entry
+- [ ] Install React stack in client: `react`, `react-dom`, `@types/react`, `@types/react-dom`, `react-markdown`
+- [ ] Build `<TasteEditor />` in React — markdown editor + live preview, writes to `data/user/taste.md` via `PUT /api/taste`
+- [ ] Add service worker for offline cache (covers both entries)
 - [ ] Add `manifest.json` for PWA install
 - [ ] Polish: typography, spacing, dark mode
 
 ### Resume copy after this phase:
 > "Built a Progressive Web App player with Spotify Web Playback SDK
-> integration, real-time DJ commentary via WebSocket, and an in-app
-> markdown editor for taste preferences. Installable as a standalone
-> app on mobile and desktop."
+> integration and real-time DJ commentary via WebSocket. Primary player
+> UI in Vanilla TypeScript for minimal bundle size; embedded a React +
+> react-markdown sub-app for the in-app taste editor where richer state
+> management justified the dependency. Installable as a standalone app
+> on mobile and desktop."
 
 ---
 
