@@ -9,6 +9,71 @@
 
 ---
 
+## 2026-05-04 (Mon) · Phase 1 scaffold + env config done
+
+**Phase:** 1 (Project skeleton & Spotify login)
+**Time spent:** ~6 hrs
+**Sessions today:** 1 (long)
+
+### Done
+- Set up npm workspaces monorepo: `@claudio/server` and `@claudio/client`
+- Server: Express + TypeScript via `tsx watch`, `GET /api/health` returning `{ ok: true }`
+- Client: Vite 9 + Vanilla TypeScript scaffold, replaced default welcome page
+  with minimal Claudio landing page that calls `/api/health` to verify proxy
+- Vite dev proxy `/api/* → 127.0.0.1:3000` to avoid CORS in dev and keep
+  fetch paths identical between dev and prod
+- Wired root `npm run dev` via `concurrently` with labeled, colored output
+- Decided UI split for Phase 5: Vanilla TS for the main player, React
+  sub-app for the taste editor where state management actually earns the
+  dependency. Updated 02-roadmap.md.
+- Renamed `SERVER_PORT` → `PORT` in `.env.example` for cloud platform
+  convention (Railway/Heroku auto-inject `PORT`)
+- Added `NODE_ENV` to env template
+- Installed Phase 1 follow-on deps: `dotenv`, `better-sqlite3`, `cors`,
+  plus matching `@types/*`
+- 3 conventional commits pushed to main:
+  - `chore: scaffold monorepo with server and client workspaces`
+  - `docs: split Phase 5 UI into vanilla TS player and React taste editor`
+  - `chore: configure env vars and install phase 1 deps`
+
+### Blockers / lessons
+- **Empty file ≠ error**: `tsx watch` ran a zero-byte `index.ts` without
+  complaining, so the absence of a "listening on 3000" log was the only
+  signal. Lesson: when a command runs but the expected output is missing,
+  verify the input file's actual contents before debugging code logic.
+- **npm workspace `-w` flag is root-relative**: running `npm install ... -w server`
+  from inside `server/` makes npm look for `server/server/`. Workspace
+  commands always think from the root.
+- **Editor TS ≠ workspace TS**: Cursor bundles its own TypeScript and
+  uses it for red squigglies by default, separate from the version in
+  `node_modules/typescript`. When the IDE flags a flag that `tsc` accepts
+  (e.g. `erasableSyntaxOnly`), switch via `Cmd+Shift+P → TypeScript:
+  Select TypeScript Version → Use Workspace Version`. Pin permanently
+  later via `.vscode/settings.json` (tech debt, not done yet).
+- **Confirmed TypeScript 6.0.3 is current stable** (released 2026-03-23,
+  last release on the JS codebase before the Go-based 7.0). `^6.0.3` in
+  package.json is correct, not a beta version as initially suspected.
+
+### Next session goal
+Add the dotenv loader to `server/src/index.ts` with fail-fast validation
+of required env vars (PORT, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET,
+SPOTIFY_REDIRECT_URI). Should be ~15 min, then move into Spotify OAuth:
+write `GET /api/login` that redirects to Spotify with PKCE (code_verifier,
+code_challenge, state). Stop before `/callback` — that's the next session.
+
+### Mood / notes
+Long session for Phase 1's first day, but ending on a clean state: 4
+commits, no half-finished code, dependencies in place. The Phase 5 UI
+decision (Vanilla TS + React sub-app) is a small architecture moment
+that's going to read well on a resume bullet — "use React where it earns
+its keep, not by default" is a senior signal.
+
+Spent some time at the end weighing "do more vs. stop" and chose to stop
+just before the dotenv loader. Right call: PKCE flow needs fresh attention
+tomorrow, not tired attention tonight.
+
+---
+
 ## 2026-05-03 (Sun) · Phase 0 complete
 
 **Phase:** 0 (Environment & scaffold)
