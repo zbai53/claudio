@@ -55,6 +55,8 @@ pids/
 *.sqlite
 *.sqlite3
 *.db-journal
+*.db-wal
+*.db-shm
 
 # ========================================
 # Editor / IDE
@@ -100,3 +102,5 @@ cache/
 
 # Local user data files (each developer has their own)
 data/local/
+data/*
+!data/.gitkeep

@@ -19,6 +19,7 @@ const REQUIRED_ENV_VARS = [
   'SPOTIFY_CLIENT_ID',
   'SPOTIFY_CLIENT_SECRET',
   'SPOTIFY_REDIRECT_URI',
+  'DATABASE_PATH',
 ] as const;
 
 // Fail fast on startup if any required var is missing. We'd rather crash
@@ -37,6 +38,7 @@ if (missing.length > 0) {
 export const config = {
   port: Number(process.env.PORT),
   nodeEnv: process.env.NODE_ENV as 'development' | 'production' | 'test',
+  databasePath: process.env.DATABASE_PATH!,
   spotify: {
     clientId: process.env.SPOTIFY_CLIENT_ID!,
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET!,

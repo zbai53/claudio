@@ -1,5 +1,6 @@
 import express from 'express';
 
+import './state/db.js';
 import { authRouter } from './auth/routes.js';
 import { config } from './config.js';
 
