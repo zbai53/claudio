@@ -9,6 +9,104 @@
 
 ---
 
+Push 成功。Phase 1 完成度:80%。剩下的就是 /callback、token 持久化、/api/me、前端登录按钮。
+
+EOD
+今天产出回顾,然后 progress log。
+今天做了什么(可量化)
+
+✅ dotenv loader + fail-fast validation(config.ts)
+✅ tsconfig 修正(.ts/.js 模式选择)
+✅ PKCE 概念理解(verifier、challenge、state、SHA-256)
+✅ Spotify OAuth /api/login redirect 工作
+✅ 3 个 commit push 到 GitHub
+✅ 验证 redirect URL 7 个参数全部正确
+
+当前 HEAD 7350e06 包含的能力:server 启动时验证 env,接收 /api/auth/login 请求,生成密码学安全的 PKCE 参数,redirect 到 Spotify 带正确签名。这是生产可部署的 OAuth 启动逻辑,不是教学样例。
+Progress log entry
+复制下面这段贴到 03-progress-log.md 顶部:
+markdown## 2026-05-05 (Tue) · OAuth login redirect with PKCE working
+
+**Phase:** 1 (Project skeleton & Spotify login)
+**Time spent:** ~3.5 hrs
+**Sessions today:** 1
+
+### Done
+- Built `server/src/config.ts` for env loading with fail-fast validation:
+  - Explicit `.env` path via `path.resolve(__dirname, '../../.env')`
+    instead of `dotenv/config`, to avoid cwd ambiguity in npm workspaces
+  - `__dirname` derived from `import.meta.url` because ESM has no global
+  - Validates 5 required vars on startup; throws with full list of missing
+- Fixed tsconfig: removed `allowImportingTsExtensions` since server uses
+  production mode A (compile to dist/, run `node dist/index.js`).
+  Imports use `.js` paths even though source is `.ts` — modern ESM idiom
+- Verified the build chain: `npm run build -w server` produces clean
+  `dist/index.js` and `dist/config.js`
+- Implemented Spotify OAuth login redirect with PKCE:
+  - `auth/pkce.ts`: pure functions for code_verifier (32 random bytes),
+    code_challenge (SHA-256 of verifier), and state (32 random bytes)
+    using `node:crypto` with base64url encoding throughout
+  - `auth/store.ts`: in-memory Map keyed by state with 10-min TTL and
+    consume-on-read semantics for replay protection
+  - `auth/routes.ts`: `GET /api/auth/login` generates params, saves
+    verifier keyed by state, redirects to Spotify via URLSearchParams
+  - All 7 OAuth query params verified correct on a real Spotify redirect
+- 3 conventional commits pushed:
+  - `docs: log Phase 1 scaffold and env config session`
+  - `feat(server): add env loading with fail-fast validation`
+  - `feat(auth): add spotify oauth login redirect with pkce`
+
+### Blockers / lessons
+- **dotenv + npm workspace cwd trap**: `dotenv/config` reads from cwd,
+  but `npm run dev -w server` sets cwd to `server/`. The `.env` lives
+  at the repo root. Fix: explicit `path.resolve(__dirname, ...)`.
+  Generalizable: never rely on cwd for file paths in monorepos.
+- **`allowImportingTsExtensions` ⇄ `noEmit` are paired flags**: server
+  needs to emit JS for production, so it can't use either. Client uses
+  both because Vite handles bundling. Don't blindly copy tsconfig flags
+  between workspaces.
+- **"Make IDE red squigglies disappear" ≠ "fix the problem"**: when a
+  TS flag errored, instinct was to add `noEmit` to silence it, but that
+  put the config in a contradictory state. Lesson: read the error,
+  understand what it actually wants, decide the right fix. Don't
+  reflexively reach for `Fix in Composer`.
+- **PKCE ≠ state**: they solve different attacks. PKCE protects against
+  the auth code being intercepted in the redirect; state protects
+  against CSRF (someone tricking you into completing their OAuth flow).
+  Both required for a real implementation.
+- **`URLSearchParams` over manual string concat for query strings**:
+  spaces, special chars, and unicode all encode correctly. Hand-rolled
+  query building is a bug magnet — interview-worthy point.
+
+### Next session goal
+Implement `/callback` to complete the OAuth round-trip:
+1. Receive `?code=...&state=...` from Spotify redirect
+2. Validate state against pending auth store (reject mismatched/missing)
+3. Look up code_verifier by state, then exchange code+verifier for
+   access_token+refresh_token at `https://accounts.spotify.com/api/token`
+4. Persist tokens (decision needed: SQLite schema vs encrypted file)
+5. Test full round-trip: visit /api/auth/login → log in → land back at
+   /callback → server logs the tokens
+
+Stop before `/api/me` — that's the next session.
+
+### Mood / notes
+Today's 3.5 hours felt productive without being draining. The PKCE
+explanation before coding made the implementation feel obvious instead
+of cargo-culted from a tutorial. Now I can describe the protocol from
+memory: verifier → SHA-256 → challenge → Spotify keeps challenge → at
+token exchange, prove ownership by re-presenting verifier.
+
+The .ts/.js detour was the second time I tripped over an ESM+TS edge
+case. Worth writing the resolution somewhere I'll remember next project.
+
+Backlog (carrying forward):
+- Install Prettier + ESLint, automate format nits (~30 min, before /callback)
+- Pin editor TS version via .vscode/settings.json (~5 min)
+- Replace in-memory PKCE store with SQLite once token persistence is in
+- Decide token storage approach (SQLite plain text vs encrypted-at-rest)
+
+
 ## 2026-05-04 (Mon) · Phase 1 scaffold + env config done
 
 **Phase:** 1 (Project skeleton & Spotify login)
