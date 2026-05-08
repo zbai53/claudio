@@ -9,23 +9,232 @@
 
 ---
 
-Push 成功。Phase 1 完成度:80%。剩下的就是 /callback、token 持久化、/api/me、前端登录按钮。
 
-EOD
-今天产出回顾,然后 progress log。
-今天做了什么(可量化)
+## 2026-05-08 (Fri) · Phase 1 milestone — Spotify login flow complete
 
-✅ dotenv loader + fail-fast validation(config.ts)
-✅ tsconfig 修正(.ts/.js 模式选择)
-✅ PKCE 概念理解(verifier、challenge、state、SHA-256)
-✅ Spotify OAuth /api/login redirect 工作
-✅ 3 个 commit push 到 GitHub
-✅ 验证 redirect URL 7 个参数全部正确
+**Phase:** 1 (Project skeleton & Spotify login) — **COMPLETE**
+**Time spent:** ~3 hrs
+**Sessions today:** 1
 
-当前 HEAD 7350e06 包含的能力:server 启动时验证 env,接收 /api/auth/login 请求,生成密码学安全的 PKCE 参数,redirect 到 Spotify 带正确签名。这是生产可部署的 OAuth 启动逻辑,不是教学样例。
-Progress log entry
-复制下面这段贴到 03-progress-log.md 顶部:
-markdown## 2026-05-05 (Tue) · OAuth login redirect with PKCE working
+### Done
+- Implemented `auth/tokenService.ts` with two functions:
+  - `getValidAccessToken()` — eager refresh strategy. Checks `expires_at`
+    against `Date.now()`, refreshes if within a 60s buffer, returns a
+    guaranteed-valid token. Business code never has to retry.
+  - `refreshAccessToken()` — server-to-server POST to Spotify token
+    endpoint with `grant_type=refresh_token`. Handles the spec quirk
+    where Spotify may or may not rotate the refresh_token by falling
+    back to the existing one with `??`.
+- Implemented `GET /api/me` in a new `user/` module:
+  - Resolves a valid token via `tokenService`, calls Spotify `/v1/me`
+    with `Bearer` auth header
+  - Translates response to a clean public shape (id, displayName,
+    imageUrl, spotifyUrl), decoupling frontend from Spotify's wire format
+  - Returns differentiated 401 vs 502 status codes for different failure
+    modes (not authenticated vs upstream error)
+  - All error responses are JSON with `error` code + `message`,
+    matching the success path content type
+- Added `CLIENT_URL` env var so `/callback` redirects to the frontend
+  instead of returning plain text. Decouples server from frontend URL
+  (different in dev vs prod).
+- Replaced the health-check landing page with a proper auth UI:
+  - Discriminated union State type (`loading` | `loggedOut` | `loggedIn`
+    | `error`) makes invalid UI states unrepresentable
+  - On page load, fetches `/api/me` to determine state. Server is the
+    single source of truth; frontend never tracks login state itself.
+  - Renders the corresponding view: spinner, Spotify-branded login
+    button with scale-on-hover feedback, or greeting with display name
+    + avatar
+  - Escapes `display_name` before `innerHTML` injection (XSS defense
+    against user-controlled content)
+- Verified end-to-end in a clean browser session:
+  - Cleared `tokens` table, refreshed page → saw login button
+  - Clicked button → Spotify consent → callback → frontend redirect
+  - Saw "Hi, bai" with avatar rendering correctly
+- 2 conventional commits:
+  - `feat(auth): add token refresh and authenticated user profile endpoint`
+  - `feat: phase 1 milestone — full spotify login flow with display name`
+
+### Blockers / lessons
+- **Eager vs lazy token refresh**: chose eager (refresh before token
+  expires) over lazy (refresh on 401, retry). Eager keeps business code
+  simple — every caller of `getValidAccessToken()` gets a usable token,
+  no retry logic. Lazy spreads retry handling across every API call site.
+  For an ambient agent that calls Spotify when the user isn't watching,
+  eager is the right default.
+- **Spotify may or may not rotate refresh_token**: missed this on the
+  first read of the spec. Code that always saves `data.refresh_token`
+  will write `undefined` to the column when Spotify omits it. `??`
+  fallback to the existing token is the fix. Generalizable: when an
+  API spec says "may or may not", assume both branches and handle each.
+- **Discriminated union for UI state**: 4 distinct UI states (loading,
+  loggedOut, loggedIn, error), each with different required data. A
+  single `if/else` on flags would let invalid combinations through
+  (e.g., "logged in but no profile"). The union type makes such states
+  uncompilable. This is "make illegal states unrepresentable" applied
+  to UI.
+- **innerHTML + user-controlled content = stored XSS**: Spotify
+  display_name is whatever the user typed, including potentially
+  `<script>alert(1)</script>`. Direct `innerHTML` would execute it.
+  Escape function is mandatory. Caught it because I'd seen the pattern
+  before; without that prior, easy to ship as a bug.
+- **Server vs client as source of truth for auth state**: the frontend
+  doesn't try to remember "I just logged in." It always asks
+  `/api/me` on load. Stateless frontend is simpler and avoids the
+  classic bug where the frontend thinks you're logged in but the server
+  has dropped the session.
+
+### Next session goal
+Phase 1 main flow is done. Phase 2 (brain adapter) is the next major
+deliverable, but before starting, do the carrying-forward backlog:
+1. Install Prettier + ESLint, automate format nits (~30 min)
+2. Pin editor TS version via `.vscode/settings.json` (~5 min)
+3. Update README to reflect Phase 1 completion + add a screenshot of
+   the logged-in state (~30 min)
+4. Replace in-memory PKCE store with SQLite or signed cookies (~45 min,
+   tech debt cleanup before Phase 2)
+5. Mark all Phase 1 tasks `[x]` in `02-roadmap.md`
+
+These together are a ~2 hr session. Then Phase 2 starts fresh — brain
+adapter is its own focused work, deserves a clean head.
+
+### Mood / notes
+Phase 1 took ~12.5 hrs against a ~10 hr estimate (+25%). Within
+acceptable variance, especially given two real engineering detours
+(`.ts/.js` ESM modes, configuration drift across .env/Dashboard/code).
+Both detours produced lasting understanding worth more than the time.
+
+The biggest growth from Phase 1 isn't code-shaped, it's mental:
+- OAuth from "buzzword" to "I can implement and explain it"
+- "Configuration drives code" as a deployable pattern, not slogan
+- Repository pattern as a default reflex, not novelty
+- Conventional commits as muscle memory, not chore
+
+Backlog (carrying forward to Phase 2 prep):
+- Prettier + ESLint setup
+- `.vscode/settings.json` for TS version pinning
+- README update + screenshot
+- In-memory PKCE store → SQLite or signed cookie
+- 02-roadmap.md task checkboxes
+
+This is a good day. Phase 1 ships.
+
+
+---
+
+## 2026-05-06 (Wed) · Spotify OAuth round-trip complete
+
+**Phase:** 1 (Project skeleton & Spotify login)
+**Time spent:** ~4 hrs
+**Sessions today:** 1
+
+### Done
+- Reviewed yesterday's PKCE concepts; got three out of three protocol
+  questions wrong on first try, then re-anchored with the full 12-step
+  flow diagram. The "answered wrong → corrected" loop sticks better
+  than passively re-reading.
+- Added `state/db.ts`: SQLite connection with `better-sqlite3`, WAL
+  journal mode, foreign key enforcement, idempotent schema migration on
+  startup. Database file at `data/claudio.db`, gitignored alongside
+  `*.db-wal` and `*.db-shm`.
+- Added `state/tokenRepository.ts`: typed save/load with prepared
+  statements, `CHECK(id = 1)` single-row constraint, snake_case to
+  camelCase translation at the persistence boundary. Repository pattern
+  hides SQL from the rest of the server.
+- Implemented `GET /api/auth/callback`:
+  - Parse and validate `code`, `state`, `error` from Spotify redirect
+  - Reject mismatched or expired state (CSRF defense via `consume`-once
+    semantics in the in-memory store)
+  - Exchange `code + verifier` for tokens via `x-www-form-urlencoded`
+    POST to Spotify's token endpoint, using native `fetch`
+  - Distinguish network-level errors from non-2xx HTTP responses (the
+    classic `fetch` quirk where bad responses don't throw); return 502
+    with separate diagnostic logs for each
+  - Convert `expires_in` (relative seconds) to `expires_at` (absolute
+    epoch ms) before persisting
+- Added `DATABASE_PATH` to required env vars; wired db init via
+  side-effect import in `index.ts`
+- Verified end-to-end: visited `/api/auth/login`, completed Spotify
+  consent, landed back at `/api/auth/callback`, saw "Login successful"
+  in browser and `OAuth round-trip complete` in server logs. SQLite
+  query confirms tokens persisted with correct ~3600s TTL.
+- 1 conventional commit:
+  - `feat(auth): complete spotify oauth round-trip with sqlite token storage`
+
+### Blockers / lessons
+- **Configuration drift across systems**: code expected callback at
+  `/api/auth/callback`, `.env` had `/callback`, Spotify Dashboard had
+  `/callback`. All three must agree, exactly. Lesson: when integrating
+  with an external system, read the external config FIRST, then write
+  code to match. Don't write code based on assumed paths.
+- **`fetch` doesn't throw on non-2xx**: a Spotify 400 response returns
+  `response.ok === false` but doesn't throw, unlike `axios`. Forgot this
+  initially — needed the `if (!tokenResponse.ok)` branch separate from
+  the `try/catch`. Two distinct failure surfaces, two distinct handlers.
+- **`-m "multi-line"` in zsh is unreliable**: a long commit message with
+  `*`, `()`, `!` characters silently failed to commit (no error, but
+  staging unchanged). Switched to `git commit -F file` with heredoc
+  using single-quoted EOF marker to disable shell interpolation.
+  Generalizable: for any commit body more than 1-2 lines, use `-F` or
+  the editor (`git commit` with no `-m`). Reserve `-m` for trivial
+  one-liners.
+- **OAuth state vs PKCE verifier — one more reframe**: state defends
+  against "someone tricks me into completing their flow" (CSRF);
+  verifier defends against "my own flow's code gets intercepted in
+  redirect" (replay/interception). Two different attacks. Implementing
+  both in the same callback handler made this concrete in a way that
+  reading docs didn't.
+- **Prepared statements + parameter binding aren't optional**: SQL
+  injection is the textbook reason, but the secondary value is type
+  safety (named params catch field-order errors that positional `?`
+  wouldn't).
+
+### Next session goal
+Phase 1 wrap-up:
+1. Add `GET /api/me`: load token from SQLite, call Spotify
+   `/v1/me` with bearer auth, return user profile JSON. If token is
+   expired (compare `expires_at` to `Date.now()`), refresh first using
+   the refresh_token. This forces us to implement token refresh logic
+   before Phase 2 — better now than later.
+2. Frontend: replace the health-check-only landing page with a "Log in
+   with Spotify" button. After login, fetch `/api/me` and show the
+   display name. This is the deliverable for Phase 1.
+3. Phase 1 wrap-up commit: `feat: phase 1 milestone — full spotify
+   login flow with display name`.
+
+Stretch (do only if energy is fresh):
+- Install Prettier + ESLint, automate format nits (carrying from earlier
+  backlog)
+- Pin editor TS version via `.vscode/settings.json`
+
+### Mood / notes
+Today went deep. Started the morning genuinely confused on PKCE (got
+all three review questions backwards). By evening, the protocol is
+implemented end-to-end with proper error handling, token persistence,
+and verified round-trip. The fact that 12-step flow now feels obvious
+is the real win — not the code.
+
+The configuration drift bug (.env vs Dashboard vs code) was annoying
+but valuable. Real OAuth integrations always have this pattern of
+"three places where the same value lives". Will remember this when
+seeing Webhook configs, OAuth in CI/CD, anything with external
+registration. Vosyn's Django + GitHub Actions had similar shapes —
+makes more sense in retrospect.
+
+Repository pattern in `tokenRepository.ts` is the cleanest piece of
+architecture I've written this project. SQL stays in one file, business
+code calls `tokenRepository.save({ accessToken, refreshToken, expiresAt })`,
+storage details are invisible. This is the model for how every other
+table will be accessed.
+
+Backlog (carrying forward):
+- Install Prettier + ESLint, automate format nits
+- Pin editor TS version via `.vscode/settings.json`
+- Replace in-memory PKCE store with SQLite (now that token persistence
+  is in place, this is small)
+- Token encryption for production deploy (Phase 6 concern, not now)
+
+## 2026-05-05 (Tue) · OAuth login redirect with PKCE working
 
 **Phase:** 1 (Project skeleton & Spotify login)
 **Time spent:** ~3.5 hrs
