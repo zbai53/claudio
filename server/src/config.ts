@@ -20,6 +20,7 @@ const REQUIRED_ENV_VARS = [
   'SPOTIFY_CLIENT_SECRET',
   'SPOTIFY_REDIRECT_URI',
   'DATABASE_PATH',
+  'CLIENT_URL',
 ] as const;
 
 // Fail fast on startup if any required var is missing. We'd rather crash
@@ -44,4 +45,7 @@ export const config = {
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET!,
     redirectUri: process.env.SPOTIFY_REDIRECT_URI!,
   },
+  client: {
+    url: process.env.CLIENT_URL!,
+  }
 } as const;

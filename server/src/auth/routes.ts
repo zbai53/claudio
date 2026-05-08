@@ -122,6 +122,7 @@ authRouter.get('/callback', async (req, res) => {
 
   console.log('[auth] OAuth round-trip complete, tokens stored');
 
-  // 5. Respond. Plain text for now; Phase 1 wrap-up will redirect to frontend.
-  res.send('Login successful! Token stored. You can close this tab.');
+  // 5. Redirect back to the frontend. The frontend will detect the new
+  // auth state by calling /api/me on load.
+  res.redirect(config.client.url);
 });
