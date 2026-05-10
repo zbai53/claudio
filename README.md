@@ -69,9 +69,6 @@ Claudio is organized in four layers, each with a clear responsibility:
 
 A more detailed architecture document lives at [`docs/architecture.md`](./docs/architecture.md) _(coming soon)_.
 
-
-
-
 ## Tech stack
 
 - **Brain** — Claude (via Claude Code subprocess locally, Anthropic API in production)

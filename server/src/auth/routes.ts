@@ -3,11 +3,7 @@ import { Router } from 'express';
 import { config } from '../config.js';
 import { tokenRepository } from '../state/tokenRepository.js';
 
-import {
-  generateCodeChallenge,
-  generateCodeVerifier,
-  generateState,
-} from './pkce.js';
+import { generateCodeChallenge, generateCodeVerifier, generateState } from './pkce.js';
 import { consumePendingAuth, savePendingAuth } from './store.js';
 
 const SPOTIFY_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';

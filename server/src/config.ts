@@ -47,5 +47,5 @@ export const config = {
   },
   client: {
     url: process.env.CLIENT_URL!,
-  }
+  },
 } as const;

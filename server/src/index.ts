@@ -16,7 +16,5 @@ app.use('/api', userRouter);
 
 // Bind to 127.0.0.1 explicitly: Spotify rejects 'localhost' in OAuth redirect URIs.
 app.listen(config.port, '127.0.0.1', () => {
-  console.log(
-    `[server] listening on http://127.0.0.1:${config.port} (${config.nodeEnv})`,
-  );
+  console.log(`[server] listening on http://127.0.0.1:${config.port} (${config.nodeEnv})`);
 });

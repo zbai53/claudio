@@ -2,6 +2,7 @@
   "name": "claudio",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Personal AI radio that learns listening habits and curates Spotify playlists with DJ-style commentary.",
   "license": "MIT",
   "workspaces": [
@@ -9,9 +10,17 @@
     "client"
   ],
   "scripts": {
-    "dev": "concurrently -n server,client -c blue,green \"npm run dev -w server\" \"npm run dev -w client\""
+    "dev": "concurrently -n server,client -c blue,green \"npm run dev -w server\" \"npm run dev -w client\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "concurrently": "^9.0.0"
+    "concurrently": "^9.0.0",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.3",
+    "typescript-eslint": "^8.59.2"
   }
 }
