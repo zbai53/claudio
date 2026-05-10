@@ -9,6 +9,61 @@
 
 ---
 
+## 2026-05-10 (Sun) · Phase 1 backlog cleared, Phase 2 types defined
+
+**Phase:** 1 backlog → 2 (Brain adapter)
+**Time spent:** ~2 hrs
+**Sessions today:** 1
+
+### Done
+- Installed Prettier + ESLint (typescript-eslint, eslint-config-prettier)
+  as root devDependencies covering the full monorepo
+- Configured .prettierrc.json (singleQuote, semi, trailingComma all,
+  printWidth 100) and .prettierignore (excludes docs/, data/, lock file)
+- Configured eslint.config.js with ESLint 9 flat config format,
+  typescript-eslint recommended preset, prettier integration
+- Added format, format:check, lint scripts to root package.json
+- Added "type": "module" to root package.json — eslint.config.js uses
+  ESM imports; without this Node reparsed it on every lint run
+- Fixed .gitignore: .vscode/ → .vscode/* so the !settings.json
+  exception rule actually takes effect (git ignores ! exceptions when
+  the parent directory itself is ignored)
+- Added .vscode/settings.json: pin TS to workspace version, format on
+  save, ESLint auto-fix on save — committed so anyone cloning gets the
+  same editor behavior
+- Updated README: fixed C## Architecture typo, removed "not all
+  components implemented" warning, updated roadmap checkboxes
+- Marked all Phase 1 tasks complete in 02-roadmap.md with actual time
+- Defined BrainResponse interface (say, play[], reason, segue) and
+  Brain interface (invoke returns Promise<BrainResponse>) in
+  server/src/brain/types.ts — the JSON contract every LLM adapter
+  must satisfy
+
+### Blockers / lessons
+- Dot file naming: .prettierrc.json must have the leading dot or
+  Prettier silently ignores it and falls back to defaults. First
+  debug move when a config tool "isn't working": ls -la to verify
+  the filename is exactly right.
+- .gitignore parent directory rule: if a directory is ignored with
+  dir/, files inside cannot be un-ignored with !dir/file. Fix is
+  dir/* (ignore contents) instead of dir/ (ignore directory).
+- Promise vs synchronous return: LLM calls take 2-10 seconds.
+  Returning Promise<BrainResponse> lets Node.js handle other requests
+  while waiting; a synchronous return would freeze the event loop.
+
+### Next session goal
+Phase 2 — implement SubprocessBrain: spawn a claude -p subprocess,
+pipe the prompt to stdin, collect stdout, parse the JSON response
+into BrainResponse. This is the local development path (zero API cost).
+Start with server/src/brain/subprocess.ts.
+
+### Mood / notes
+Clean session. No blockers, 2 hrs, 5 commits. Toolchain is now
+automated — Prettier and ESLint run on save, no more manual format nits.
+Phase 2 has its foundation: the type contract is defined before any
+implementation is written, which is the right order.
+---
+
 
 ## 2026-05-08 (Fri) · Phase 1 milestone — Spotify login flow complete
 
