@@ -41,7 +41,7 @@
 
 ## Phase 1 — Project skeleton & Spotify login
 
-**Estimate:** ~10 hrs over 4–5 days · **Status:** not started · **Up next**
+**Estimate:** ~10 hrs over 4–5 days · **Actual:** ~12.5 hrs over 5 days · **Status:** complete
 
 ### Goals
 - A running Node.js backend on `127.0.0.1:3000`
@@ -50,21 +50,21 @@
 - All secrets in `.env`, never committed
 
 ### Task list
-- [ ] `npm init` in repo root, set up monorepo structure (`/server`, `/client`)
-- [ ] Create real `.env` from `.env.example`, fill in Spotify credentials
-- [ ] Install backend deps: `express`, `dotenv`, `better-sqlite3`, `cors`
-- [ ] Install dev deps: `nodemon`, `typescript`, `@types/express`, `@types/node`
-- [ ] Set up `tsconfig.json` for both server and client
-- [ ] Write minimal Express server: `GET /api/health` returns `{ ok: true }`
-- [ ] Set up Vite + TypeScript on the client side
-- [ ] Wire `npm run dev` to start both server and client concurrently
-- [ ] Implement Spotify OAuth flow:
-  - [ ] `GET /api/login` redirects to Spotify with PKCE
-  - [ ] `GET /callback` exchanges code for tokens
-  - [ ] Store tokens in SQLite (encrypted-ish — at least not plaintext logs)
-  - [ ] `GET /api/me` returns current user's Spotify profile
-- [ ] Frontend: a single button "Log in with Spotify" + display name on success
-- [ ] First end-to-end commit: "feat: spotify oauth login flow"
+- [x] `npm init` in repo root, set up monorepo structure (`/server`, `/client`)
+- [x] Create real `.env` from `.env.example`, fill in Spotify credentials
+- [x] Install backend deps: `express`, `dotenv`, `better-sqlite3`, `cors`
+- [x] Install dev deps: `nodemon`, `typescript`, `@types/express`, `@types/node`
+- [x] Set up `tsconfig.json` for both server and client
+- [x] Write minimal Express server: `GET /api/health` returns `{ ok: true }`
+- [x] Set up Vite + TypeScript on the client side
+- [x] Wire `npm run dev` to start both server and client concurrently
+- [x] Implement Spotify OAuth flow:
+  - [x] `GET /api/login` redirects to Spotify with PKCE
+  - [x] `GET /callback` exchanges code for tokens
+  - [x] Store tokens in SQLite (encrypted-ish — at least not plaintext logs)
+  - [x] `GET /api/me` returns current user's Spotify profile
+- [x] Frontend: a single button "Log in with Spotify" + display name on success
+- [x] First end-to-end commit: "feat: spotify oauth login flow"
 
 ### Deliverable
 A short demo: open `http://127.0.0.1:5173`, click button, complete Spotify
