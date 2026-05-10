@@ -39,33 +39,28 @@ project. The radio is just the first instance.
 
 ## Architecture
 
-C## Architecture
-
 Claudio is organized in four layers, each with a clear responsibility:
-
-```
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 1 · Inputs                                       │
 │  User taste corpus · Spotify · Calendar · Weather · TTS │
 └────────────────────────┬────────────────────────────────┘
-                         ▼
+▼
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 2 · Local brain                                  │
 │  router · context assembler · Claude adapter            │
 │  scheduler · TTS pipeline · SQLite state                │
 └────────────────────────┬────────────────────────────────┘
-                         ▼
+▼
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 3 · Context window                               │
 │  6 fragments composed into every prompt                 │
 │  → model returns { say, play[], reason, segue }         │
 └────────────────────────┬────────────────────────────────┘
-                         ▼
+▼
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 4 · Surface                                      │
 │  PWA player · HTTP + WebSocket contract                 │
 └─────────────────────────────────────────────────────────┘
-```
 
 A more detailed architecture document lives at [`docs/architecture.md`](./docs/architecture.md) _(coming soon)_.
 
@@ -88,10 +83,6 @@ A more detailed architecture document lives at [`docs/architecture.md`](./docs/a
 
 ## Getting started
 
-> ⚠️ This project is in early development. The instructions below describe
-> the intended setup; not all components are implemented yet.
-> See [Roadmap](#roadmap) for current status.
-
 ```bash
 # Clone the repository
 git clone git@github.com:zbai53/claudio.git
@@ -111,11 +102,16 @@ npm run dev
 The PWA will be available at `http://127.0.0.1:5173`.
 The backend runs on `http://127.0.0.1:3000`.
 
+After starting, open the PWA and click **Log in with Spotify** to complete
+OAuth. You should see your Spotify display name and avatar on success.
+
 ## Roadmap
 
 - [x] Project scaffold and tooling
-- [ ] Spotify OAuth integration
-- [ ] Claude adapter (local subprocess + API fallback)
+- [x] Spotify OAuth (PKCE flow) with SQLite token storage and refresh rotation
+- [x] Authenticated Spotify profile endpoint (`GET /api/me`)
+- [x] Frontend login UI with discriminated union state machine
+- [ ] Claude brain adapter (local subprocess + Anthropic API fallback)
 - [ ] Context assembler (6-fragment prompt composition)
 - [ ] Scheduler (morning briefing + hourly mood checks)
 - [ ] PWA player with Web Playback SDK
