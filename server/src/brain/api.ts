@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { Brain, BrainResponse } from './types.js';
+import { Brain, BrainResponse, BrainResponseSchema } from './types.js';
 
 /**
  * Invokes the Anthropic API directly and parses the response as
@@ -58,34 +58,13 @@ export class ApiBrain implements Brain {
       throw new Error(`ApiBrain: response is not valid JSON.\nRaw output: ${raw.slice(0, 200)}`);
     }
 
-    return this.validate(parsed);
-  }
-
-  private validate(parsed: unknown): BrainResponse {
-    if (typeof parsed !== 'object' || parsed === null) {
-      throw new Error('ApiBrain: response is not an object');
+    const result = BrainResponseSchema.safeParse(parsed);
+    if (!result.success) {
+      throw new Error(
+        `ApiBrain: response does not match BrainResponse schema.\n${result.error.message}`,
+      );
     }
 
-    const obj = parsed as Record<string, unknown>;
-
-    if (typeof obj['say'] !== 'string') {
-      throw new Error('ApiBrain: missing or invalid field "say"');
-    }
-    if (!Array.isArray(obj['play']) || !obj['play'].every((t) => typeof t === 'string')) {
-      throw new Error('ApiBrain: missing or invalid field "play"');
-    }
-    if (typeof obj['reason'] !== 'string') {
-      throw new Error('ApiBrain: missing or invalid field "reason"');
-    }
-    if (typeof obj['segue'] !== 'string') {
-      throw new Error('ApiBrain: missing or invalid field "segue"');
-    }
-
-    return {
-      say: obj['say'],
-      play: obj['play'] as string[],
-      reason: obj['reason'],
-      segue: obj['segue'],
-    };
+    return result.data;
   }
 }
