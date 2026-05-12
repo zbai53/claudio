@@ -9,6 +9,54 @@
 
 ---
 
+
+## 2026-05-12 (Tue) · Phase 2 complete — brain adapter ships
+
+**Phase:** 2 (Brain adapter)
+**Time spent:** ~2 hrs
+**Sessions today:** 1
+
+### Done
+- Implemented SubprocessBrain: spawns claude -p as a child process,
+  pipes prompt to stdin, collects stdout, parses as BrainResponse JSON
+- Implemented ApiBrain: calls Anthropic API via @anthropic-ai/sdk,
+  extracts first text block from response, parses as BrainResponse JSON
+- Added createBrain() factory: reads BRAIN_MODE env var, returns the
+  appropriate adapter, throws on unknown values (fail fast)
+- Replaced hand-written validate() methods with Zod schema:
+  BrainResponseSchema is single source of truth for both runtime
+  validation and TypeScript type (derived via z.infer)
+- Wrote 9 unit tests (vitest): 5 for BrainResponseSchema, 4 for
+  createBrain factory — all green in 357ms
+- Added README.md to .prettierignore — Prettier was stripping alignment
+  spaces from the ASCII architecture diagram on every format run
+
+### Blockers / lessons
+- stdin.end() is required after writing to a subprocess stdin —
+  without it the child process waits indefinitely for more input
+- unknown vs any: unknown forces explicit type checks before use,
+  any bypasses them entirely. validate() exists to check types, so
+  unknown is the right choice
+- Fail fast vs default values: createBrain() throws on missing
+  BRAIN_MODE instead of defaulting to subprocess. A missing env var
+  should surface at startup, not silently run the wrong adapter in
+  production and fail on the first invoke() call
+- Promise<BrainResponse> not BrainResponse: LLM calls take 2-10
+  seconds. Async return lets Node.js handle other requests while
+  waiting; synchronous would freeze the event loop
+
+### Next session goal
+Phase 2 is complete. Before Phase 3 (context assembly), update
+02-roadmap.md to mark Phase 2 tasks complete. Then start Phase 3
+first task: create data/user/taste.md, routines.md, mood-rules.md
+with starter content and write loaders/taste.ts to read them.
+
+### Mood / notes
+Phase 2 ships clean: 6 commits, dual-mode adapter pattern, Zod
+validation, 9 tests. The brain module is the most interview-worthy
+piece of the project so far — adapter pattern, cost optimization,
+schema validation, async design all in one module.
+
 ## 2026-05-10 (Sun) · Phase 1 backlog cleared, Phase 2 types defined
 
 **Phase:** 1 backlog → 2 (Brain adapter)
