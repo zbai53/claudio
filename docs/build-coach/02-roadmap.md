@@ -79,7 +79,7 @@ login, see "Hi, Zhihao" on screen. Boring but proves the foundation works.
 
 ## Phase 2 — Brain adapter (the dual-mode core)
 
-**Estimate:** ~14 hrs over 5–6 days · **Status:** not started
+**Estimate:** ~14 hrs over 5–6 days · **Actual:** ~4 hrs over 2 days · **Status:** complete ✅
 
 ### Goals
 - One module: `server/src/brain/index.ts`
@@ -90,15 +90,15 @@ login, see "Hi, Zhihao" on screen. Boring but proves the foundation works.
 - Both produce identical JSON output
 
 ### Task list
-- [ ] Define TypeScript types for the JSON contract: `BrainResponse`
-- [ ] Write the abstract `Brain` interface
-- [ ] Implement `SubprocessBrain` — spawns Claude Code, streams stdout
-- [ ] Implement `ApiBrain` — calls Anthropic SDK with same system prompt
-- [ ] Build a factory: `createBrain()` reads env, returns the right one
-- [ ] Add a JSON schema validator (zod) so malformed responses fail loud
-- [ ] Write 3–5 unit tests covering both adapters with mocked output
-- [ ] Add `npm run brain:test` — invokes brain with a sample prompt, prints output
-- [ ] Document the contract in `docs/brain-contract.md`
+- [x] Define TypeScript types for the JSON contract: `BrainResponse`
+- [x] Write the abstract `Brain` interface
+- [x] Implement `SubprocessBrain` — spawns Claude Code, streams stdout
+- [x] Implement `ApiBrain` — calls Anthropic SDK with same system prompt
+- [x] Build a factory: `createBrain()` reads env, returns the right one
+- [x] Add a JSON schema validator (zod) so malformed responses fail loud
+- [x] Write 3–5 unit tests covering both adapters with mocked output
+- [x] Add `npm run brain:test` — invokes brain with a sample prompt, prints output
+- [x] Document the contract in `docs/brain-contract.md`
 
 ### Why this is interview gold
 This is the most resume-worthy module in the project. Talking points:
