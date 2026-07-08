@@ -105,3 +105,6 @@ cache/
 data/local/
 data/*
 !data/.gitkeep
+# Track starter corpus files so new contributors have a working baseline
+!data/user/
+!data/user/*.md
