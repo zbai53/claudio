@@ -108,3 +108,4 @@ data/*
 # Track starter corpus files so new contributors have a working baseline
 !data/user/
 !data/user/*.md
+.claude/
