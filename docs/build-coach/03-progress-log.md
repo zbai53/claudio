@@ -1,3 +1,59 @@
+## 2026-05-15 (Thu) · Phase 4 complete — scheduler, state, WebSocket, TTS
+
+**Phase:** 4 (Runtime: scheduler + state + TTS)
+**Time spent:** ~8 hrs
+**Sessions today:** 1 (marathon — second consecutive, must stop this pattern)
+
+### Done
+- Added 4 new SQLite tables (messages, plays, plan, prefs) with typed
+  repository module: prepared statements, snake_case→camelCase mapping,
+  INSERT-then-SELECT pattern for returning inserted rows
+- Replaced memory loader stub with real getRecentPlays(20) query
+- Installed node-cron, implemented three cron jobs:
+  - Morning plan (7 AM): assembleContext → brain.invoke → resolvePlaylist
+    → savePlan to SQLite
+  - Morning brief (9 AM): assembleContext → brain.invoke → log DJ intro
+  - Hourly mood check (10 AM–10 PM): assembleContext → brain.invoke → log
+  - POST /api/scheduler/trigger for manual testing without waiting for cron
+- Added WebSocket server on /stream:
+  - Typed message union (dj, track, plan, mood)
+  - broadcast() sends to all connected clients with per-client try/catch
+  - Refactored index.ts: app.listen → createServer(app) + server.listen
+    so Express and WS share the same port
+  - Scheduler jobs and DJ invoke endpoint now broadcast results
+- Added TTS via Web Speech API:
+  - speak() with Set-based cache (first 50 chars as key) to avoid repeats
+  - stopSpeaking() cancels ongoing speech
+- Frontend WebSocket integration:
+  - connectWebSocket() with auto-reconnect on close (3s delay)
+  - DJ bubble: fixed-position overlay with Spotify green tint, fadeInUp
+    animation, updates on each dj message
+  - Only connects after successful auth (inside loggedIn branch)
+  - Vite proxy config for /stream WebSocket in dev mode
+
+### Blockers / lessons
+- createServer(app) pattern: Express's app.listen() creates an HTTP server
+  internally. To share the server with WebSocketServer, you must create
+  the server yourself with createServer(app) and pass it to both Express
+  and WS. This is the standard Express + WS integration pattern.
+- Vite WebSocket proxy: without { ws: true } in the proxy config, Vite
+  only proxies HTTP, not WebSocket upgrades. The /stream path needs
+  its own proxy entry pointing to ws://127.0.0.1:3000.
+
+### Next session goal
+REST. Two consecutive 7-8 hour sessions is unsustainable. Take two full
+days off. Phase 5 (PWA player UI) starts fresh after rest.
+
+When returning: update 02-roadmap.md to mark Phase 4 complete, then
+start Phase 5 — Spotify Web Playback SDK integration.
+
+### Mood / notes
+Second marathon in a row. The velocity is impressive — four phases in
+two extended sessions — but this pace will catch up. The project is
+ahead of schedule; there is zero urgency to keep pushing. Quality of
+the remaining phases depends on showing up rested, not showing up fast.
+
+
 ## 2026-05-13 (Wed) · Phase 2 + Phase 3 complete — end-to-end DJ pipeline
 
 **Phase:** 2 → 3 (Brain adapter + Context assembly)
