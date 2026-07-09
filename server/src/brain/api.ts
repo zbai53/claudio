@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { Brain, BrainResponse, BrainResponseSchema } from './types.js';
+import { Brain, BrainResponse, BrainResponseSchema, stripFences } from './types.js';
 
 /**
  * Invokes the Anthropic API directly and parses the response as
@@ -53,7 +53,7 @@ export class ApiBrain implements Brain {
     let parsed: unknown;
 
     try {
-      parsed = JSON.parse(raw.trim());
+      parsed = JSON.parse(stripFences(raw));
     } catch {
       throw new Error(`ApiBrain: response is not valid JSON.\nRaw output: ${raw.slice(0, 200)}`);
     }

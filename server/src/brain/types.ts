@@ -28,6 +28,22 @@ export const BrainResponseSchema = z.object({
 export type BrainResponse = z.infer<typeof BrainResponseSchema>;
 
 /**
+ * Strip markdown code fences from raw LLM output before JSON.parse.
+ *
+ * Claude occasionally wraps its response in ```json ... ``` even when
+ * instructed not to. This function removes the opening fence line
+ * (```json or ```) and the closing ``` so JSON.parse can succeed.
+ */
+export function stripFences(raw: string): string {
+  let s = raw.trim();
+  // Remove opening fence line (```json or ```, with optional trailing whitespace)
+  s = s.replace(/^```(?:json)?\s*\n?/, '');
+  // Remove closing fence
+  s = s.replace(/\n?```\s*$/, '');
+  return s.trim();
+}
+
+/**
  * The contract every Brain adapter must satisfy.
  *
  * invoke() takes a fully-assembled prompt string and returns a parsed,

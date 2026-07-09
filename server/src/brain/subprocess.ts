@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import { Brain, BrainResponse, BrainResponseSchema } from './types.js';
+import { Brain, BrainResponse, BrainResponseSchema, stripFences } from './types.js';
 
 /**
  * Invokes the Claude Code CLI as a subprocess and parses its stdout
@@ -60,7 +60,7 @@ export class SubprocessBrain implements Brain {
     let parsed: unknown;
 
     try {
-      parsed = JSON.parse(raw.trim());
+      parsed = JSON.parse(stripFences(raw));
     } catch {
       throw new Error(
         `SubprocessBrain: claude output is not valid JSON.\nRaw output: ${raw.slice(0, 200)}`,
