@@ -1,3 +1,6 @@
+import { speak } from './lib/tts.js';
+import { connectWebSocket, WsMessage } from './lib/ws.js';
+
 interface UserProfile {
   id: string;
   displayName: string;
@@ -76,6 +79,28 @@ function escapeHtml(s: string): string {
     .replace(/'/g, '&#39;');
 }
 
+let djBubbleEl: HTMLElement | null = null;
+
+function handleWsMessage(message: WsMessage): void {
+  if (message.type === 'dj') {
+    speak(message.say);
+    if (djBubbleEl) {
+      djBubbleEl.textContent = message.say;
+    } else {
+      const bubble = document.createElement('div');
+      bubble.className = 'dj-bubble';
+      bubble.textContent = message.say;
+      const container = document.querySelector('.container') ?? document.body;
+      container.appendChild(bubble);
+      djBubbleEl = bubble;
+    }
+  } else if (message.type === 'plan') {
+    console.log('[ws] plan received:', message.date, message.trackCount);
+  } else if (message.type === 'mood') {
+    console.log('[ws] mood update:', message.reason);
+  }
+}
+
 async function checkAuth(): Promise<void> {
   render({ kind: 'loading' });
 
@@ -97,6 +122,7 @@ async function checkAuth(): Promise<void> {
 
     const profile = (await res.json()) as UserProfile;
     render({ kind: 'loggedIn', profile });
+    connectWebSocket(handleWsMessage);
   } catch (err) {
     render({
       kind: 'error',
