@@ -5,7 +5,7 @@ import { loadEnvironment } from '../loaders/environment.js';
 import { loadMemory } from '../loaders/memory.js';
 import { loadTaste } from '../loaders/taste.js';
 
-const PERSONA_PATH = path.resolve(process.cwd(), 'prompts/dj-persona.md');
+const PERSONA_PATH = path.resolve(process.cwd(), '../prompts/dj-persona.md');
 
 const INSTRUCTIONS =
   '## Instructions\n\nBased on all context above, pick 3-5 tracks and write your DJ intro. Respond with raw JSON only.';
