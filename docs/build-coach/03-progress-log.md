@@ -1,3 +1,66 @@
+## 2026-05-13 (Wed) · Phase 2 + Phase 3 complete — end-to-end DJ pipeline
+
+**Phase:** 2 → 3 (Brain adapter + Context assembly)
+**Time spent:** ~7 hrs
+**Sessions today:** 1 (marathon — not repeatable, see notes)
+
+### Done
+- **Phase 1 backlog cleared:**
+  - Installed Prettier + ESLint with typescript-eslint flat config
+  - Added .vscode/settings.json (TS pinning, format-on-save, ESLint fix)
+  - Fixed .gitignore: .vscode/ → .vscode/* for negation rule
+  - Updated README: fixed typo, updated roadmap, removed stale warning
+  - Marked Phase 1 complete in 02-roadmap.md
+
+- **Phase 2 — Brain adapter (complete):**
+  - BrainResponse Zod schema + Brain interface in types.ts
+  - SubprocessBrain: spawns claude -p, pipes stdin, collects stdout
+  - ApiBrain: calls @anthropic-ai/sdk, extracts first text block
+  - createBrain() factory with fail-fast BRAIN_MODE validation
+  - stripFences() to handle markdown code fences in LLM output
+  - 9 unit tests (vitest), all green
+
+- **Phase 3 — Context assembly (complete):**
+  - Created starter taste corpus: taste.md, routines.md, mood-rules.md
+  - loadTaste(): reads all three files with Promise.all
+  - loadEnvironment(): stub with real timestamp, fake weather/calendar
+  - loadMemory(): stub awaiting Phase 4 plays table
+  - dj-persona.md: system prompt with JSON output contract
+  - assembleContext(): 6-fragment prompt composer
+  - POST /api/dj/invoke: thin route wiring assembler + brain
+  - searchTrack() + resolvePlaylist(): Spotify search API resolution
+  - End-to-end verified: curl returns DJ intro + 4 real Spotify URIs
+
+### Blockers / lessons
+- process.cwd() under npm workspaces: "npm run dev -w server" sets
+  cwd to server/, not project root. Paths using process.cwd() must
+  account for this with ../ prefix. Caught via descriptive error
+  message in assembleContext — good error messages pay for themselves.
+- LLM markdown fences: even with "respond with raw JSON only" in the
+  system prompt, Claude sometimes wraps output in ```json fences.
+  stripFences() before JSON.parse handles this gracefully.
+- Spotify search fuzzy matching: "Tycho Awake" resolved to an FKJ
+  track because "Awake" is an album name not a track. Not a code bug —
+  can be improved later with artist:X track:Y query syntax.
+- Promise.all pattern: used three times today (loadTaste, assembleContext,
+  resolvePlaylist) — parallel async when operations are independent.
+
+### Next session goal
+REST DAY. 7 hours is not sustainable. Phase 4 (scheduler + state + TTS)
+starts after a full day off. First task: node-cron setup for morning
+plan trigger.
+
+### Mood / notes
+Most productive day on the project — but also the longest. Three phases
+of work compressed into one session. The magic moment (first real DJ
+response with Spotify URIs) was worth it, but this pace will lead to
+burnout if repeated. The 2-3 hr/day guideline exists for a reason.
+
+Phase 3 deliverable from 02-roadmap.md is fully met: curl returns
+JSON with song suggestions and a DJ intro that demonstrably read
+the taste preferences. The pipeline works end-to-end.
+
+
 # Claudio — Build Progress Log
 
 > Daily log of what got done, what got stuck, what's next.
