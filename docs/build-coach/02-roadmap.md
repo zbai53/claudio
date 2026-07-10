@@ -154,7 +154,7 @@ read your taste preferences. The first time this works it will feel magical.
 
 ## Phase 4 — Runtime: scheduler + state + TTS
 
-**Estimate:** ~13 hrs over 5–6 days · **Status:** not started
+**Estimate:** ~13 hrs over 5–6 days · **Actual:** ~8 hrs over 1 day · **Status:** complete ✅
 
 ### Goals
 - 7 AM plan trigger fires automatically (cron-style)
@@ -163,16 +163,16 @@ read your taste preferences. The first time this works it will feel magical.
 - Web Speech API speaks DJ intros in the browser
 
 ### Task list
-- [ ] Add `node-cron` for scheduling
-- [ ] Implement triggers: morning plan (7 AM), morning brief (9 AM), hourly mood check
-- [ ] Write `state/repository.ts` — typed wrapper around SQLite
-- [ ] Migrations: `messages`, `plays`, `plan`, `prefs` tables
-- [ ] Write `router.ts` — dispatches user input to direct/spotify/claude paths
-- [ ] Implement TTS pipeline:
-  - [ ] Browser-side: Web Speech API integration
-  - [ ] Cache TTS output by hash of text (so repeats are instant)
-- [ ] Add WebSocket server for live "now playing" updates
-- [ ] Frontend: subscribe to WS, animate DJ message in/out
+- [x] Add `node-cron` for scheduling
+- [x] Implement triggers: morning plan (7 AM), morning brief (9 AM), hourly mood check
+- [x] Write `state/repository.ts` — typed wrapper around SQLite
+- [x] Migrations: `messages`, `plays`, `plan`, `prefs` tables
+- [x] Write `router.ts` — dispatches user input to direct/spotify/claude paths
+- [x] Implement TTS pipeline:
+  - [x] Browser-side: Web Speech API integration
+  - [x] Cache TTS output by hash of text (so repeats are instant)
+- [x] Add WebSocket server for live "now playing" updates
+- [x] Frontend: subscribe to WS, animate DJ message in/out
 
 ### Resume copy after this phase:
 > "Built a cron-driven scheduler that proactively triggers AI invocations
