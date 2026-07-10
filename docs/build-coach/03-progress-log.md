@@ -1,3 +1,59 @@
+## 2026-05-17 (Sat) · Phase 5 core — Spotify playback working end-to-end
+
+**Phase:** 5 (PWA player UI)
+**Time spent:** ~2 hrs
+**Sessions today:** 1
+
+### Done
+- Integrated Spotify Web Playback SDK: frontend dynamically loads the
+  SDK script, creates a "Claudio" virtual device via Spotify Connect,
+  and renders player state (album art, track name, artist, play/pause)
+- Added GET /api/spotify/token endpoint so the SDK can fetch a fresh
+  access token without exposing it in HTML or cookies
+- Added POST /api/spotify/play and playTracks() for programmatic
+  playback — logs plays to SQLite and broadcasts via WebSocket
+- Added POST /api/spotify/device so frontend can register the SDK
+  device ID with the server; playTracks() passes device_id as query
+  parameter on PUT /me/player/play
+- Wired DJ invoke → auto-play: POST /api/dj/invoke now resolves
+  tracks then automatically starts Spotify playback
+- Scheduler jobs (morning plan, morning brief) also auto-play
+- Added streaming, user-modify-playback-state, user-read-playback-state
+  to OAuth scopes (was missing, caused 401 "Permissions missing")
+- Fixed PlayerState / WsMessage export: Vite esbuild needed
+  "import type" separated from value imports
+- Now Playing UI: album art, track/artist name, play/pause button
+  with Spotify green styling
+- End-to-end verified: curl invoke → brain response → Spotify search
+  → auto-play in browser with Now Playing update
+
+### Blockers / lessons
+- OAuth scope evolution: Phase 1 only needed user-read-private and
+  user-read-email. Phase 5 playback requires streaming,
+  user-modify-playback-state, user-read-playback-state. Adding scopes
+  requires clearing tokens and re-authenticating — old tokens cannot
+  gain new scopes via refresh.
+- Spotify device_id: the Web Playback SDK creates a device but the
+  play API won't find it unless device_id is passed explicitly. The
+  SDK docs mention "transfer playback" but passing device_id as a
+  query param is simpler.
+- Browser autoplay policy: TTS via speechSynthesis is blocked unless
+  the user has interacted with the page first. curl-triggered DJ
+  intros won't speak. Fix: add a user-facing trigger button (later).
+- Vite + esbuild type exports: "import { Type } from '...'" can fail
+  if the module uses declare global. Splitting into
+  "import type { Type }" fixes it.
+
+### Next session goal
+Phase 5 remaining UI tasks: TasteEditor (markdown editor for taste.md),
+Settings panel, service worker + PWA manifest, UI polish. These are
+all frontend work, no new server endpoints needed.
+
+### Mood / notes
+2 hours, controlled pace. Core Phase 5 deliverable (music plays in
+browser) is done. The remaining tasks are UI polish, not core
+functionality. Good stopping point.
+
 ## 2026-05-15 (Thu) · Phase 4 complete — scheduler, state, WebSocket, TTS
 
 **Phase:** 4 (Runtime: scheduler + state + TTS)
