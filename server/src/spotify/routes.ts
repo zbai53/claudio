@@ -5,6 +5,22 @@ import { playTracks } from './playback.js';
 
 export const spotifyRouter = Router();
 
+let activeDeviceId: string | null = null;
+
+export function getActiveDeviceId(): string | null {
+  return activeDeviceId;
+}
+
+spotifyRouter.post('/device', (req, res) => {
+  const { deviceId } = req.body as { deviceId?: string };
+  if (typeof deviceId !== 'string' || !deviceId) {
+    res.status(400).json({ error: { code: 'INVALID_DEVICE_ID', message: 'deviceId is required' } });
+    return;
+  }
+  activeDeviceId = deviceId;
+  res.json({ ok: true });
+});
+
 // The frontend Spotify Web Playback SDK needs a fresh access token to
 // initialize its player. We serve it here rather than embedding it in HTML
 // or a cookie, so the token is never visible in the page source or devtools

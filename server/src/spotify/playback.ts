@@ -1,6 +1,7 @@
 import { getValidAccessToken } from '../auth/tokenService.js';
 import { logPlay } from '../state/repository.js';
 import { broadcast } from '../ws/index.js';
+import { getActiveDeviceId } from './routes.js';
 
 const SPOTIFY_PLAY_URL = 'https://api.spotify.com/v1/me/player/play';
 
@@ -18,7 +19,12 @@ export async function playTracks(uris: string[], trigger: string): Promise<void>
   try {
     const token = await getValidAccessToken();
 
-    const response = await fetch(SPOTIFY_PLAY_URL, {
+    const deviceId = getActiveDeviceId();
+    if (!deviceId) {
+      throw new Error('No active Claudio device. Open the app in a browser first.');
+    }
+
+    const response = await fetch(`${SPOTIFY_PLAY_URL}?device_id=${encodeURIComponent(deviceId)}`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,

@@ -29,7 +29,10 @@ interface SpotifyPlayer {
   previousTrack(): Promise<void>;
   addListener(event: 'ready', cb: (e: { device_id: string }) => void): void;
   addListener(event: 'not_ready', cb: (e: { device_id: string }) => void): void;
-  addListener(event: 'player_state_changed', cb: (state: SpotifyWebPlaybackState | null) => void): void;
+  addListener(
+    event: 'player_state_changed',
+    cb: (state: SpotifyWebPlaybackState | null) => void,
+  ): void;
 }
 
 interface SpotifySDK {
@@ -94,6 +97,11 @@ export async function initPlayer(onStateChange: PlayerCallback): Promise<void> {
   player.addListener('ready', ({ device_id }) => {
     console.log('[player] ready, device_id:', device_id);
     currentDeviceId = device_id;
+    fetch('/api/spotify/device', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId: device_id }),
+    }).catch((err) => console.error('[player] failed to register device:', err));
     onStateChange({
       ready: true,
       deviceId: device_id,
