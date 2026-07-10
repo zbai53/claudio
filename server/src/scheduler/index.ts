@@ -2,6 +2,7 @@ import cron from 'node-cron';
 
 import { createBrain } from '../brain/index.js';
 import { assembleContext } from '../context/assemble.js';
+import { playTracks } from '../spotify/playback.js';
 import { resolvePlaylist } from '../spotify/search.js';
 import { savePlan } from '../state/repository.js';
 import { broadcast } from '../ws/index.js';
@@ -15,6 +16,12 @@ async function runMorningPlan(): Promise<void> {
   const tracks = await resolvePlaylist(response.play);
   const todayDate = new Date().toISOString().slice(0, 10);
   savePlan(todayDate, JSON.stringify(tracks), response.say, response.segue);
+  if (tracks.length > 0) {
+    await playTracks(
+      tracks.map((t) => t.uri),
+      'morning plan',
+    );
+  }
   broadcast({ type: 'plan', date: todayDate, trackCount: tracks.length });
   console.log('[scheduler] morning plan saved:', todayDate);
 }
@@ -25,6 +32,13 @@ async function runMorningBrief(): Promise<void> {
     'morning briefing: greet the user and introduce today playlist',
   );
   const response = await brain.invoke(prompt);
+  const briefTracks = await resolvePlaylist(response.play);
+  if (briefTracks.length > 0) {
+    await playTracks(
+      briefTracks.map((t) => t.uri),
+      'morning brief',
+    );
+  }
   broadcast({ type: 'dj', say: response.say, segue: response.segue });
   console.log('[scheduler] morning brief:', response.say);
 }
