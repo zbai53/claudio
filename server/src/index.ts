@@ -8,6 +8,7 @@ import { config } from './config.js';
 import { djRouter } from './dj/routes.js';
 import { schedulerRouter } from './scheduler/routes.js';
 import { startScheduler } from './scheduler/index.js';
+import { spotifyRouter } from './spotify/routes.js';
 import { userRouter } from './user/routes.js';
 import { initWebSocket } from './ws/index.js';
 
@@ -23,6 +24,7 @@ app.use('/api/auth', authRouter);
 app.use('/api', userRouter);
 app.use('/api/dj', djRouter);
 app.use('/api/scheduler', schedulerRouter);
+app.use('/api/spotify', spotifyRouter);
 
 const server = createServer(app);
 initWebSocket(server);

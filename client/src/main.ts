@@ -1,3 +1,4 @@
+import { initPlayer, PlayerState, togglePlay } from './lib/player.js';
 import { speak } from './lib/tts.js';
 import { connectWebSocket, WsMessage } from './lib/ws.js';
 
@@ -101,6 +102,42 @@ function handleWsMessage(message: WsMessage): void {
   }
 }
 
+function handlePlayerState(state: PlayerState): void {
+  const container = document.querySelector('.container');
+  if (!container) return;
+
+  let section = container.querySelector<HTMLElement>('.now-playing');
+  if (!section) {
+    section = document.createElement('div');
+    section.className = 'now-playing';
+    container.appendChild(section);
+  }
+
+  if (!state.ready) {
+    section.innerHTML = `<p class="status">Connecting to Spotify...</p>`;
+    return;
+  }
+
+  if (!state.trackName) {
+    section.innerHTML = `<p class="status">Ready — waiting for tracks</p>`;
+    return;
+  }
+
+  const icon = state.isPlaying ? '&#9646;&#9646;' : '&#9654;';
+  section.innerHTML = `
+    ${state.albumArt ? `<img src="${escapeHtml(state.albumArt)}" alt="Album art" class="album-art">` : ''}
+    <div class="track-info">
+      <p class="track-name">${escapeHtml(state.trackName)}</p>
+      <p class="artist-name">${escapeHtml(state.artistName ?? '')}</p>
+    </div>
+    <button class="play-btn" aria-label="${state.isPlaying ? 'Pause' : 'Play'}">${icon}</button>
+  `;
+
+  section.querySelector('.play-btn')?.addEventListener('click', () => {
+    void togglePlay();
+  });
+}
+
 async function checkAuth(): Promise<void> {
   render({ kind: 'loading' });
 
@@ -123,6 +160,7 @@ async function checkAuth(): Promise<void> {
     const profile = (await res.json()) as UserProfile;
     render({ kind: 'loggedIn', profile });
     connectWebSocket(handleWsMessage);
+    void initPlayer(handlePlayerState);
   } catch (err) {
     render({
       kind: 'error',
