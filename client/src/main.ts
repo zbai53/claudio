@@ -1,3 +1,4 @@
+import './style.css';
 import { initPlayer, togglePlay } from './lib/player.js';
 import type { PlayerState } from './lib/player.js';
 import { speak } from './lib/tts.js';
