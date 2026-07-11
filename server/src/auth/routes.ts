@@ -11,7 +11,13 @@ const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
 
 // Phase 1 only needs profile read access. More scopes come in Phase 4-5
 // when we add playback control and listening history reads.
-const SCOPES = ['user-read-private', 'user-read-email'];
+const SCOPES = [
+  'user-read-private',
+  'user-read-email',
+  'streaming',
+  'user-modify-playback-state',
+  'user-read-playback-state',
+];
 
 // Shape of the response from Spotify's token endpoint. snake_case to
 // match Spotify's API; we translate to camelCase when storing.

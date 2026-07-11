@@ -1,6 +1,8 @@
-import { initPlayer, PlayerState, togglePlay } from './lib/player.js';
+import { initPlayer, togglePlay } from './lib/player.js';
+import type { PlayerState } from './lib/player.js';
 import { speak } from './lib/tts.js';
-import { connectWebSocket, WsMessage } from './lib/ws.js';
+import { connectWebSocket } from './lib/ws.js';
+import type { WsMessage } from './lib/ws.js';
 
 interface UserProfile {
   id: string;
