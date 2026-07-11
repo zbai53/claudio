@@ -53,6 +53,7 @@ function render(state: State): void {
             ${state.profile.imageUrl ? `<img src="${state.profile.imageUrl}" alt="" class="avatar">` : ''}
             <p class="greeting">Hi, ${escapeHtml(state.profile.displayName)}</p>
           </div>
+          <button class="ask-dj-btn" id="ask-dj">Ask DJ</button>
         </main>
       `;
       break;
@@ -87,16 +88,7 @@ let djBubbleEl: HTMLElement | null = null;
 function handleWsMessage(message: WsMessage): void {
   if (message.type === 'dj') {
     speak(message.say);
-    if (djBubbleEl) {
-      djBubbleEl.textContent = message.say;
-    } else {
-      const bubble = document.createElement('div');
-      bubble.className = 'dj-bubble';
-      bubble.textContent = message.say;
-      const container = document.querySelector('.container') ?? document.body;
-      container.appendChild(bubble);
-      djBubbleEl = bubble;
-    }
+    showDjBubble(message.say);
   } else if (message.type === 'plan') {
     console.log('[ws] plan received:', message.date, message.trackCount);
   } else if (message.type === 'mood') {
@@ -140,6 +132,52 @@ function handlePlayerState(state: PlayerState): void {
   });
 }
 
+function showDjBubble(text: string): void {
+  if (djBubbleEl) {
+    djBubbleEl.textContent = text;
+  } else {
+    const bubble = document.createElement('div');
+    bubble.className = 'dj-bubble';
+    bubble.textContent = text;
+    const container = document.querySelector('.container') ?? document.body;
+    container.appendChild(bubble);
+    djBubbleEl = bubble;
+  }
+}
+
+async function handleAskDj(): Promise<void> {
+  const btn = document.getElementById('ask-dj') as HTMLButtonElement | null;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'DJ is thinking...';
+  }
+
+  try {
+    const res = await fetch('/api/dj/invoke', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trigger: 'user requested playlist' }),
+    });
+
+    if (!res.ok) {
+      const body = (await res.json()) as { error?: { message?: string } };
+      showDjBubble(body.error?.message ?? `Error ${res.status}`);
+      return;
+    }
+
+    const data = (await res.json()) as { say: string; play?: boolean; tracks?: string[] };
+    speak(data.say);
+    showDjBubble(data.say);
+  } catch (err) {
+    showDjBubble(err instanceof Error ? err.message : 'Something went wrong');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Ask DJ';
+    }
+  }
+}
+
 async function checkAuth(): Promise<void> {
   render({ kind: 'loading' });
 
@@ -161,6 +199,7 @@ async function checkAuth(): Promise<void> {
 
     const profile = (await res.json()) as UserProfile;
     render({ kind: 'loggedIn', profile });
+    document.getElementById('ask-dj')?.addEventListener('click', () => void handleAskDj());
     connectWebSocket(handleWsMessage);
     void initPlayer(handlePlayerState);
   } catch (err) {

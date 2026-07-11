@@ -83,6 +83,28 @@ h1 {
   color: rgba(255, 255, 255, 0.87);
 }
 
+.ask-dj-btn {
+  background: transparent;
+  border: 1px solid rgba(30, 215, 96, 0.5);
+  color: #1ed760;
+  padding: 12px 32px;
+  border-radius: 24px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 24px;
+  transition: all 0.2s ease;
+}
+
+.ask-dj-btn:hover {
+  background: rgba(30, 215, 96, 0.1);
+  border-color: #1ed760;
+}
+
+.ask-dj-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .dj-bubble {
   position: fixed;
   bottom: 24px;
