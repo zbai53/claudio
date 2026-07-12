@@ -9,6 +9,7 @@ import { djRouter } from './dj/routes.js';
 import { schedulerRouter } from './scheduler/routes.js';
 import { startScheduler } from './scheduler/index.js';
 import { spotifyRouter } from './spotify/routes.js';
+import { tasteRouter } from './taste/routes.js';
 import { userRouter } from './user/routes.js';
 import { initWebSocket } from './ws/index.js';
 
@@ -25,6 +26,7 @@ app.use('/api', userRouter);
 app.use('/api/dj', djRouter);
 app.use('/api/scheduler', schedulerRouter);
 app.use('/api/spotify', spotifyRouter);
+app.use('/api/taste', tasteRouter);
 
 const server = createServer(app);
 initWebSocket(server);

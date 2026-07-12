@@ -55,6 +55,7 @@ function render(state: State): void {
             <p class="greeting">Hi, ${escapeHtml(state.profile.displayName)}</p>
           </div>
           <button class="ask-dj-btn" id="ask-dj">Ask DJ</button>
+          <button class="edit-taste-btn" id="edit-taste">Edit Taste</button>
         </main>
       `;
       break;
@@ -179,6 +180,68 @@ async function handleAskDj(): Promise<void> {
   }
 }
 
+async function handleEditTaste(): Promise<void> {
+  const res = await fetch('/api/taste');
+  if (!res.ok) {
+    showDjBubble('Could not load taste files.');
+    return;
+  }
+
+  const { files } = (await res.json()) as { files: { name: string; content: string }[] };
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+
+  files.forEach(({ name, content }, i) => {
+    const heading = document.createElement('h3');
+    heading.textContent = name;
+    if (i === 0) heading.style.marginTop = '0';
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'taste-textarea';
+    textarea.dataset.filename = name;
+    textarea.value = content;
+
+    modal.appendChild(heading);
+    modal.appendChild(textarea);
+  });
+
+  const actions = document.createElement('div');
+  actions.className = 'modal-actions';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.textContent = 'Close';
+  closeBtn.addEventListener('click', () => overlay.remove());
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'save-btn';
+  saveBtn.textContent = 'Save All';
+  saveBtn.addEventListener('click', async () => {
+    const textareas = modal.querySelectorAll<HTMLTextAreaElement>('.taste-textarea');
+    await Promise.all(
+      Array.from(textareas).map((ta) =>
+        fetch(`/api/taste/${encodeURIComponent(ta.dataset.filename ?? '')}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: ta.value }),
+        }),
+      ),
+    );
+    overlay.remove();
+    showDjBubble('Taste updated!');
+  });
+
+  actions.appendChild(closeBtn);
+  actions.appendChild(saveBtn);
+  modal.appendChild(actions);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+}
+
 async function checkAuth(): Promise<void> {
   render({ kind: 'loading' });
 
@@ -201,6 +264,7 @@ async function checkAuth(): Promise<void> {
     const profile = (await res.json()) as UserProfile;
     render({ kind: 'loggedIn', profile });
     document.getElementById('ask-dj')?.addEventListener('click', () => void handleAskDj());
+    document.getElementById('edit-taste')?.addEventListener('click', () => void handleEditTaste());
     connectWebSocket(handleWsMessage);
     void initPlayer(handlePlayerState);
   } catch (err) {
