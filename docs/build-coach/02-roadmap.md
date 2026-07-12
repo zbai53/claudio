@@ -184,7 +184,7 @@ read your taste preferences. The first time this works it will feel magical.
 
 ## Phase 5 — PWA player UI
 
-**Estimate:** ~13 hrs over 5–6 days · **Status:** not started
+**Estimate:** ~11 hrs over 4–5 days · **Actual:** ~5 hrs over 2 days · **Status:** complete ✅
 
 ### Goals
 - Looks and feels like a real product, not a dev tool
@@ -207,16 +207,16 @@ Build implication: Vite supports multiple entry points. The root
 loads the React sub-app. Both share the same dev server.
 
 ### Task list
-- [ ] Integrate Spotify Web Playback SDK
-- [ ] Build `<NowPlaying />` component (vanilla TS)
-- [ ] Build `<DjBubble />` for streaming chatter (vanilla TS)
-- [ ] Build `<Settings />` — toggle voices, change persona, view spending (vanilla TS)
-- [ ] Configure Vite multi-entry: add `settings/taste/index.html` as second entry
-- [ ] Install React stack in client: `react`, `react-dom`, `@types/react`, `@types/react-dom`, `react-markdown`
-- [ ] Build `<TasteEditor />` in React — markdown editor + live preview, writes to `data/user/taste.md` via `PUT /api/taste`
-- [ ] Add service worker for offline cache (covers both entries)
-- [ ] Add `manifest.json` for PWA install
-- [ ] Polish: typography, spacing, dark mode
+- [x] Integrate Spotify Web Playback SDK
+- [x] Build `<NowPlaying />` component (vanilla TS)
+- [x] Build `<DjBubble />` for streaming chatter (vanilla TS)
+- [x] Build `<Settings />` — toggle voices, change persona, view spending (vanilla TS)
+- [x] Configure Vite multi-entry: add `settings/taste/index.html` as second entry
+- [x] Install React stack in client: `react`, `react-dom`, `@types/react`, `@types/react-dom`, `react-markdown`
+- [x] Build `<TasteEditor />` in React — markdown editor + live preview, writes to `data/user/taste.md` via `PUT /api/taste`
+- [x] Add service worker for offline cache (covers both entries)
+- [x] Add `manifest.json` for PWA install
+- [x] Polish: typography, spacing, dark mode
 
 ### Resume copy after this phase:
 > "Built a Progressive Web App player with Spotify Web Playback SDK
