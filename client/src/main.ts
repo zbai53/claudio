@@ -1,7 +1,7 @@
 import './style.css';
 import { initPlayer, togglePlay } from './lib/player.js';
 import type { PlayerState } from './lib/player.js';
-import { speak } from './lib/tts.js';
+import { speak, setTtsEnabled } from './lib/tts.js';
 import { connectWebSocket } from './lib/ws.js';
 import type { WsMessage } from './lib/ws.js';
 
@@ -56,6 +56,7 @@ function render(state: State): void {
           </div>
           <button class="ask-dj-btn" id="ask-dj">Ask DJ</button>
           <button class="edit-taste-btn" id="edit-taste">Edit Taste</button>
+          <button class="edit-taste-btn" id="settings">Settings</button>
         </main>
       `;
       break;
@@ -242,6 +243,103 @@ async function handleEditTaste(): Promise<void> {
   document.body.appendChild(overlay);
 }
 
+async function handleSettings(): Promise<void> {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+
+  // Voice section
+  const voiceSection = document.createElement('div');
+  voiceSection.className = 'settings-section';
+  const voiceHeading = document.createElement('h3');
+  voiceHeading.textContent = 'Voice';
+  voiceHeading.style.marginTop = '0';
+
+  const ttsEnabled = localStorage.getItem('claudio-tts-enabled') !== 'false';
+  const toggleLabel = document.createElement('label');
+  toggleLabel.className = 'toggle-row';
+  toggleLabel.innerHTML = `
+    <span>DJ voice (Text-to-Speech)</span>
+    <input type="checkbox" id="tts-toggle" ${ttsEnabled ? 'checked' : ''}>
+  `;
+  toggleLabel.querySelector<HTMLInputElement>('#tts-toggle')?.addEventListener('change', (e) => {
+    const val = (e.target as HTMLInputElement).checked;
+    localStorage.setItem('claudio-tts-enabled', String(val));
+    setTtsEnabled(val);
+  });
+
+  voiceSection.appendChild(voiceHeading);
+  voiceSection.appendChild(toggleLabel);
+
+  // Spotify Account section
+  const accountSection = document.createElement('div');
+  accountSection.className = 'settings-section';
+  const accountHeading = document.createElement('h3');
+  accountHeading.textContent = 'Spotify Account';
+
+  const accountContent = document.createElement('div');
+  accountContent.className = 'settings-account';
+
+  try {
+    const res = await fetch('/api/me');
+    if (res.ok) {
+      const profile = (await res.json()) as UserProfile;
+      if (profile.imageUrl) {
+        const img = document.createElement('img');
+        img.src = profile.imageUrl;
+        img.alt = '';
+        accountContent.appendChild(img);
+      }
+      const name = document.createElement('span');
+      name.className = 'settings-info';
+      name.textContent = escapeHtml(profile.displayName);
+      accountContent.appendChild(name);
+    }
+  } catch {
+    accountContent.textContent = 'Could not load account info';
+  }
+
+  const logoutNote = document.createElement('p');
+  logoutNote.className = 'settings-info';
+  logoutNote.textContent = 'To log out, clear browser data for this site.';
+
+  accountSection.appendChild(accountHeading);
+  accountSection.appendChild(accountContent);
+  accountSection.appendChild(logoutNote);
+
+  // App Info section
+  const infoSection = document.createElement('div');
+  infoSection.className = 'settings-section';
+  const infoHeading = document.createElement('h3');
+  infoHeading.textContent = 'App Info';
+
+  const infoContent = document.createElement('p');
+  infoContent.className = 'settings-info';
+  infoContent.innerHTML = 'Claudio v0.1.0<br>Development mode (subprocess)';
+
+  infoSection.appendChild(infoHeading);
+  infoSection.appendChild(infoContent);
+
+  // Actions
+  const actions = document.createElement('div');
+  actions.className = 'modal-actions';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.textContent = 'Close';
+  closeBtn.addEventListener('click', () => overlay.remove());
+  actions.appendChild(closeBtn);
+
+  modal.appendChild(voiceSection);
+  modal.appendChild(accountSection);
+  modal.appendChild(infoSection);
+  modal.appendChild(actions);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+}
+
 async function checkAuth(): Promise<void> {
   render({ kind: 'loading' });
 
@@ -265,6 +363,7 @@ async function checkAuth(): Promise<void> {
     render({ kind: 'loggedIn', profile });
     document.getElementById('ask-dj')?.addEventListener('click', () => void handleAskDj());
     document.getElementById('edit-taste')?.addEventListener('click', () => void handleEditTaste());
+    document.getElementById('settings')?.addEventListener('click', () => void handleSettings());
     connectWebSocket(handleWsMessage);
     void initPlayer(handlePlayerState);
   } catch (err) {
