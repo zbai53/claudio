@@ -375,3 +375,9 @@ async function checkAuth(): Promise<void> {
 }
 
 void checkAuth();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('/sw.js')
+    .catch((err) => console.error('[sw] registration failed:', err));
+}

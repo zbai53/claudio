@@ -13,6 +13,16 @@ export default tseslint.config(
     },
   },
   {
+    files: ['client/public/sw.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        fetch: 'readonly',
+      },
+    },
+  },
+  {
     ignores: ['node_modules/', 'dist/', 'data/', '**/*.config.js'],
   },
 );
