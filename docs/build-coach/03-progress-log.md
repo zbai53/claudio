@@ -1,3 +1,41 @@
+## 2026-05-18 (Sun) · Phase 5 complete — full PWA player UI
+
+**Phase:** 5 (PWA player UI) — **COMPLETE**
+**Time spent:** ~2 hrs
+**Sessions today:** 1
+
+### Done
+- Added Settings panel: TTS on/off toggle (persisted to localStorage),
+  Spotify account info from /api/me, app version display. Reuses modal
+  pattern from taste editor.
+- Added PWA manifest with standalone display mode, theme color, and
+  SVG app icon. Service worker uses network-first strategy for offline
+  fallback. SW registration added to main.ts.
+- Marked Phase 5 complete in 02-roadmap.md
+
+### Blockers / lessons
+- PWA install prompt only appears on HTTPS — dev mode on HTTP won't
+  show the install button in Chrome. Manifest and service worker are
+  in place; they'll activate automatically after HTTPS deployment.
+- localStorage for TTS toggle: simple persistence without a server
+  round-trip. Appropriate for a client-only preference that doesn't
+  affect the brain or playlist logic.
+
+### Next session goal
+Phase 6 — deploy + portfolio polish. Main tasks:
+1. Find a free hosting option (Fly.io or Render.com — Railway
+   exhausted)
+2. Deploy backend + frontend
+3. Record 60-second demo video
+4. Update README with screenshots + video embed
+5. Final resume copy
+
+### Mood / notes
+2 hours, 3 commits, controlled pace. Phase 5 ships with all planned
+features: Spotify playback, Now Playing UI, Ask DJ button, Taste
+Editor, Settings panel, PWA manifest. The app looks and feels like
+a real product. Five phases complete in ~19 days of work.
+
 ## 2026-05-17 (Sat) · Phase 5 core — Spotify playback working end-to-end
 
 **Phase:** 5 (PWA player UI)
