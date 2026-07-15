@@ -1,3 +1,56 @@
+## 2026-05-19 (Mon) · Phase 6 complete — Claudio is live
+
+**Phase:** 6 (Deploy + portfolio polish) — **COMPLETE**
+**Time spent:** ~2 hrs
+**Sessions today:** 1
+
+### Done
+- Deployed to Render.com at https://claudio-k7bd.onrender.com
+- Production build setup: Vite client build + tsc server compile,
+  Express serves static files in production mode
+- Created paths.ts to abstract project root resolution between dev
+  (cwd=server/) and production (cwd=root/)
+- Fixed Express wildcard route: '*' → '/{*path}' for path-to-regexp v8+
+- Fixed production start command: "node server/dist/index.js" from
+  project root instead of "cd server && node dist/index.js"
+- Fixed production bind address: 127.0.0.1 → 0.0.0.0 in production
+  so Render's router can reach the process
+- Replaced in-memory PKCE store with SQLite — Render free tier spins
+  down on inactivity, clearing memory. SQLite survives restarts.
+- Added production redirect URI to Spotify Dashboard
+- Made CLIENT_URL optional (not needed in production, same origin)
+- Updated README with live URL, three screenshots (login, dashboard,
+  playing), key engineering decisions section, complete roadmap
+- Added .nvmrc and render.yaml Blueprint
+
+### Blockers / lessons
+- devDependencies in production build: Render sets NODE_ENV=production
+  which makes npm install skip devDeps. Build needs vite and tsc.
+  Fix: npm install --include=dev in build command.
+- path-to-regexp v8 breaking change: Express 5+ uses new path-to-regexp
+  that rejects bare '*'. New syntax is '/{*path}'. Error message was
+  clear but the fix wasn't obvious without knowing the new API.
+- PKCE in-memory store vs serverless: any platform that spins down
+  (Render free, Lambda, Cloud Run) will lose in-memory state between
+  the OAuth redirect and callback. Must persist to disk or DB.
+- process.cwd() varies by start command: "cd server && node ..." vs
+  "node server/..." produce different cwd values. Abstraction layer
+  (paths.ts) is necessary for cross-environment compatibility.
+
+### Next session goal
+Project is functionally complete. Optional remaining work:
+- Record 60-second demo video, upload to YouTube, embed in README
+- Google Calendar + OpenWeather API integration (replace stubs)
+- LinkedIn post announcing the project
+
+### Mood / notes
+All six phases complete. Claudio is live on the internet. From first
+commit to deployment: ~19 days, ~30 hours total. The project
+demonstrates: OAuth with PKCE, dual-mode LLM adapter, 6-fragment
+prompt assembly, cron scheduling, WebSocket, Spotify Web Playback SDK,
+SQLite state persistence, PWA — all in one deployable package. This
+is a strong portfolio piece.
+
 ## 2026-05-18 (Sun) · Phase 5 complete — full PWA player UI
 
 **Phase:** 5 (PWA player UI) — **COMPLETE**
