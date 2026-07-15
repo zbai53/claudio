@@ -3,12 +3,14 @@ import path from 'path';
 
 import { Router } from 'express';
 
+import { dataDir } from '../paths.js';
+
 export const tasteRouter = Router();
 
 const TASTE_FILES = ['taste.md', 'routines.md', 'mood-rules.md'] as const;
 type TasteFile = (typeof TASTE_FILES)[number];
 
-const USER_DATA_DIR = path.resolve(process.cwd(), '../data/user');
+const USER_DATA_DIR = dataDir();
 
 function isTasteFile(name: string): name is TasteFile {
   return (TASTE_FILES as readonly string[]).includes(name);

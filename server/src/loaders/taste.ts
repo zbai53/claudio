@@ -1,7 +1,9 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
 
-const USER_DATA_DIR = path.resolve(process.cwd(), '../data/user');
+import { dataDir } from '../paths.js';
+
+const USER_DATA_DIR = dataDir();
 
 async function readSection(filename: string, header: string): Promise<string> {
   const filePath = path.join(USER_DATA_DIR, filename);

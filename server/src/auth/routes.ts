@@ -125,6 +125,8 @@ authRouter.get('/callback', async (req, res) => {
   console.log('[auth] OAuth round-trip complete, tokens stored');
 
   // 5. Redirect back to the frontend. The frontend will detect the new
-  // auth state by calling /api/me on load.
-  res.redirect(config.client.url);
+  // auth state by calling /api/me on load. In production the frontend is
+  // served from the same origin, so '/' is sufficient.
+  const redirectUrl = config.client.url || '/';
+  res.redirect(redirectUrl);
 });

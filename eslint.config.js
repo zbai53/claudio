@@ -23,6 +23,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['node_modules/', 'dist/', 'data/', '**/*.config.js'],
+    ignores: ['node_modules/', 'dist/', '**/dist/', 'data/', '**/*.config.js'],
   },
 );

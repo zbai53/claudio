@@ -20,7 +20,6 @@ const REQUIRED_ENV_VARS = [
   'SPOTIFY_CLIENT_SECRET',
   'SPOTIFY_REDIRECT_URI',
   'DATABASE_PATH',
-  'CLIENT_URL',
 ] as const;
 
 // Fail fast on startup if any required var is missing. We'd rather crash
@@ -45,7 +44,10 @@ export const config = {
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET!,
     redirectUri: process.env.SPOTIFY_REDIRECT_URI!,
   },
+  // CLIENT_URL is only needed in development (Vite runs on a separate port).
+  // In production the frontend is served from the same Express server, so
+  // the callback redirects to '/' by default.
   client: {
-    url: process.env.CLIENT_URL!,
+    url: process.env.CLIENT_URL ?? '',
   },
 } as const;
