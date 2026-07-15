@@ -36,7 +36,7 @@ if (config.nodeEnv === 'production') {
   const clientDist = path.join(projectRoot(), 'client/dist');
   app.use(express.static(clientDist));
   // Catch-all: return index.html for any non-API route (SPA fallback).
-  app.get('*', (_req, res) => {
+  app.get('/{*path}', (_req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
