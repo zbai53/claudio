@@ -25,9 +25,9 @@ on rainy Sundays"_ — and plays accordingly.
 
 ## Screenshots
 
-| Login | Now Playing |
-|-------|-------------|
-| ![Login](docs/screenshots/login.png) | ![Playing](docs/screenshots/playing.png) |
+| Login | Dashboard | Now Playing |
+|-------|-----------|-------------|
+| ![Login](docs/screenshot/login.png) | ![Dashboard](docs/screenshot/dashboard.png) | ![Playing](docs/screenshot/playing.png) |
 
 ## Why I built this
 
