@@ -67,6 +67,12 @@ db.exec(`
     value TEXT NOT NULL,
     updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
   );
+
+  CREATE TABLE IF NOT EXISTS pkce_store (
+    state TEXT PRIMARY KEY,
+    code_verifier TEXT NOT NULL,
+    created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+  );
 `);
 
 console.log(`[db] connected to ${dbPath}`);
