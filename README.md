@@ -1,11 +1,12 @@
 # Claudio 🎙️
 
 > Personal AI radio that learns your listening habits and curates music like a DJ.
-> Built with Claude, Spotify, and a love for late-night programming sessions.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Status](https://img.shields.io/badge/status-in_development-orange)](#roadmap)
+[![Status](https://img.shields.io/badge/status-deployed-brightgreen)](#)
 [![Node](https://img.shields.io/badge/node-20%2B-green)](#prerequisites)
+
+**[Try it live →](https://claudio-k7bd.onrender.com)**
 
 ---
 
@@ -13,14 +14,20 @@
 
 Most music apps recommend tracks. **Claudio runs a radio station for you.**
 
-Every morning at 7 AM, it reads your calendar, checks the weather, and reviews
-what you've been listening to. Then it builds a playlist for your day, writes a
-DJ intro in your preferred style, speaks it out loud, and queues the music
-through your Spotify Premium account.
+It reads your calendar, checks the weather, and reviews what you've been
+listening to. Then it builds a playlist for your day, writes a DJ intro in
+your preferred style, speaks it out loud, and queues the music through your
+Spotify Premium account.
 
 It's not a chatbot. It's not a search box. It's an ambient companion that
 notices patterns you didn't know you had — _"you always reach for downtempo
 on rainy Sundays"_ — and plays accordingly.
+
+## Screenshots
+
+| Login | Now Playing |
+|-------|-------------|
+| ![Login](docs/screenshots/login.png) | ![Playing](docs/screenshots/playing.png) |
 
 ## Why I built this
 
@@ -39,63 +46,69 @@ project. The radio is just the first instance.
 
 ## Architecture
 
-Claudio is organized in four layers, each with a clear responsibility:
+```
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 1 · Inputs                                       │
 │  User taste corpus · Spotify · Calendar · Weather · TTS │
 └────────────────────────┬────────────────────────────────┘
-▼
+                         ▼
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 2 · Local brain                                  │
 │  router · context assembler · Claude adapter            │
 │  scheduler · TTS pipeline · SQLite state                │
 └────────────────────────┬────────────────────────────────┘
-▼
+                         ▼
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 3 · Context window                               │
 │  6 fragments composed into every prompt                 │
 │  → model returns { say, play[], reason, segue }         │
 └────────────────────────┬────────────────────────────────┘
-▼
+                         ▼
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 4 · Surface                                      │
 │  PWA player · HTTP + WebSocket contract                 │
 └─────────────────────────────────────────────────────────┘
-
-A more detailed architecture document lives at [`docs/architecture.md`](./docs/architecture.md) _(coming soon)_.
+```
 
 ## Tech stack
 
-- **Brain** — Claude (via Claude Code subprocess locally, Anthropic API in production)
-- **Server** — Node.js, Express, WebSocket, SQLite
+- **Brain** — Claude (Claude Code subprocess locally, Anthropic API in production)
+- **Server** — Node.js, Express, WebSocket (`ws`), SQLite (`better-sqlite3`)
 - **Music** — Spotify Web API + Web Playback SDK (Premium account required)
-- **Voice** — Web Speech API (free) with optional ElevenLabs upgrade
-- **Context** — Google Calendar API, OpenWeather API
+- **Voice** — Web Speech API
 - **Frontend** — Vite, vanilla TypeScript, Progressive Web App
-- **Deploy** — Vercel (PWA) + Railway (server)
+- **Deploy** — Render.com (single service: Express serves both API and built client)
+
+## Engineering decisions worth calling out
+
+- **Dual-mode brain adapter** — `SubprocessBrain` spawns `claude -p` (zero API cost
+  in development); `ApiBrain` calls the Anthropic SDK. Both implement the same
+  `Brain` interface and return an identical validated JSON contract. Swap at runtime
+  via `BRAIN_MODE=subprocess|api`.
+- **Proactive scheduler** — morning planning (7 AM), morning brief (9 AM), and
+  hourly mood checks run automatically via `node-cron`, making the system proactive
+  rather than reactive.
+- **Schema as single source of truth** — `BrainResponseSchema` (Zod) derives both
+  the TypeScript type and runtime validation, so they can never drift apart.
+- **Eager token refresh** — Spotify tokens are refreshed 60 seconds before expiry,
+  not on 401 failure. Callers of `getValidAccessToken()` always receive a usable token.
+- **SQLite-backed PKCE store** — OAuth state survives server restarts (critical on
+  Render's free tier, which restarts on every deploy).
 
 ## Prerequisites
 
 - Node.js 20 or newer
 - A Spotify Premium account (Free accounts cannot use the Web Playback SDK)
 - An Anthropic API key _or_ a Claude Pro/Max subscription with Claude Code installed
-- A Google Calendar account (optional, for calendar-aware scheduling)
 
 ## Getting started
 
 ```bash
-# Clone the repository
 git clone git@github.com:zbai53/claudio.git
 cd claudio
-
-# Install dependencies
 npm install
-
-# Copy the environment template and fill in your keys
 cp .env.example .env
-# Then edit .env with your Spotify, Anthropic, and Google credentials
-
-# Start the development server
+# Edit .env with your Spotify and Anthropic credentials
 npm run dev
 ```
 
@@ -103,27 +116,25 @@ The PWA will be available at `http://127.0.0.1:5173`.
 The backend runs on `http://127.0.0.1:3000`.
 
 After starting, open the PWA and click **Log in with Spotify** to complete
-OAuth. You should see your Spotify display name and avatar on success.
+OAuth. Then click **Ask DJ** to get your first personalized playlist.
 
 ## Roadmap
 
 - [x] Project scaffold and tooling
-- [x] Spotify OAuth (PKCE flow) with SQLite token storage and refresh rotation
-- [x] Authenticated Spotify profile endpoint (`GET /api/me`)
-- [x] Frontend login UI with discriminated union state machine
-- [ ] Claude brain adapter (local subprocess + Anthropic API fallback)
-- [ ] Context assembler (6-fragment prompt composition)
-- [ ] Scheduler (morning briefing + hourly mood checks)
-- [ ] PWA player with Web Playback SDK
-- [ ] Voice synthesis pipeline
-- [ ] Cloud deployment (Vercel + Railway)
-
-## Inspiration
-
-This project is inspired by [the original Claudio concept](https://x.com)
-by an unknown author who shared the architecture diagram on social media.
-The implementation here is independent — same spirit, different stack
-(Spotify instead of NetEase, Google Calendar instead of Feishu).
+- [x] Spotify OAuth (PKCE) with SQLite token storage and refresh rotation
+- [x] Dual-mode brain adapter (subprocess + API) with Zod validation
+- [x] 6-fragment context assembly pipeline
+- [x] Cron scheduler (morning plan, brief, hourly mood checks)
+- [x] SQLite state layer (plays, messages, plan, prefs)
+- [x] WebSocket server for live client updates
+- [x] Spotify Web Playback SDK with Now Playing UI
+- [x] DJ invoke with auto-play and TTS voice
+- [x] In-app taste profile editor
+- [x] Settings panel with TTS toggle
+- [x] PWA manifest and service worker
+- [x] Production deployment on Render.com
+- [ ] Google Calendar + OpenWeather API integration
+- [ ] Demo video
 
 ## License
 
